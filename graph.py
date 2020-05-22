@@ -55,10 +55,10 @@ class Edge(object):
 
 class WeightedEdge(Edge):
     def __init__(self, src, dest, total_distance, outdoor_distance):
-        self.src = src
-        self.dest = dest
-        self.total_distance = total_distance
-        self.outdoor_distance = outdoor_distance
+        self.src = src # src must be a Node object
+        self.dest = dest # dest  must be a Node object
+        self.total_distance = total_distance # must be an int
+        self.outdoor_distance = outdoor_distance # must be an int
 
     def get_total_distance(self):
         return self.total_distance
@@ -67,7 +67,11 @@ class WeightedEdge(Edge):
         return self.outdoor_distance
 
     def __str__(self):
-        return self.src + "->" + self.dest + "(" + self.total_distance + "," + self.outdoor_distance + ")"
+        src = self.src.get_name()
+        dest = self.dest.get_name()
+        totalDist = str(self.total_distance)
+        outdoorDist = str(self.outdoor_distance)
+        return  src + "->" + dest + " (" + totalDist + ", " + outdoorDist + ")"
 
 
 class Digraph(object):
@@ -78,9 +82,13 @@ class Digraph(object):
 
     def __str__(self):
         edge_strs = []
-        for edges in self.edges.values():
-            for edge in edges:
-                edge_strs.append(str(edge))
+        for key in self.edges.keys():
+            for edge in self.edges[key]:
+                src = key.get_name()
+                dest = edge[0].get_name()
+                totalDist = str(edge[1])
+                outdoorDist = str(edge[2])
+                edge_strs.append(src + '->' + dest + ' (' + totalDist + ', ' + outdoorDist + ')')
         edge_strs = sorted(edge_strs)  # sort alphabetically
         return '\n'.join(edge_strs)  # concat edge_strs with "\n"s between them
 
@@ -93,10 +101,10 @@ class Digraph(object):
     def add_node(self, node):
         """Adds a Node object to the Digraph. Raises a ValueError if it is
         already in the graph."""
-        if node in self.nodes:
+        if node in self.edges:
             raise ValueError('Duplicate node')
         else:
-            self.nodes[node] = []
+            self.edges[node] = []
 
     def add_edge(self, edge):
         """Adds an Edge or WeightedEdge instance to the Digraph. Raises a
@@ -104,10 +112,10 @@ class Digraph(object):
         in the  graph."""
         src = edge.get_source()
         dest = edge.get_destination()
-        if not(src in self.nodes and dest in self.nodes):
+        if not(src in self.edges and dest in self.edges):
             raise ValueError('Node not in graph')
         else:
-            self.edges[src].appned(dest)
+            self.edges[src].append((dest, edge.get_total_distance(), edge.get_outdoor_distance()))
 
 
 # ================================================================
